@@ -16,9 +16,17 @@ export async function setSession(
 export async function getSession(
   userId: string
 ): Promise<Record<string, unknown> | null> {
+export async function getSession(
+  userId: string
+): Promise<Record<string, unknown> | null> {
   const sessionStr = await redisClient.get(`session:${userId}`)
   if (!sessionStr) return null
-  return JSON.parse(sessionStr)
+  try {
+    return JSON.parse(sessionStr)
+  } catch {
+    return null
+  }
+}
 }
 
 export async function deleteSession(userId: string): Promise<void> {
