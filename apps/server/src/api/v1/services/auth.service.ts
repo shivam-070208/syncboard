@@ -24,7 +24,7 @@ class AuthService {
     const result = await query(
       `INSERT INTO users (name, email, password)
        VALUES ($1, $2, $3)
-       RETURNING id, email`,
+       RETURNING id, email, name`,
       [name, email, hashed]
     )
 
