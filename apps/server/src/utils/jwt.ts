@@ -16,12 +16,30 @@ class JwtUtil {
     return jwt.sign(payload, this.refreshSecret, options)
   }
 
+import ApiError from "./api-error"
+
   verifyAccessToken(token: string) {
-    return jwt.verify(token, this.accessSecret)
+    try {
+      return jwt.verify(token, this.accessSecret)
+    } catch (err) {
+      throw new ApiError({
+        statusCode: "HTTP_401_UNAUTHORIZED",
+        message: "Invalid or expired access token",
+        cause: err,
+      })
+    }
   }
 
   verifyRefreshToken(token: string) {
-    return jwt.verify(token, this.refreshSecret)
+    try {
+      return jwt.verify(token, this.refreshSecret)
+    } catch (err) {
+      throw new ApiError({
+        statusCode: "HTTP_401_UNAUTHORIZED",
+        message: "Invalid or expired refresh token",
+        cause: err,
+      })
+    }
   }
 }
 
