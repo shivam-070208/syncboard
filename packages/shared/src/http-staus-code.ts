@@ -1,6 +1,13 @@
 export const HTTPStatusCodes = {
-  DB_UNIQUE_VIOLATION: 23505,
-  DB_FOREIGN_KEY_VIOLATION: 23503,
+  // Informational Responses
+  HTTP_100_CONTINUE: 100,
+  ...
+} as const
+
+export const DBErrorCodes = {
+  UNIQUE_VIOLATION: 23505,
+  FOREIGN_KEY_VIOLATION: 23503,
+} as const
 
   // Informational Responses
   HTTP_100_CONTINUE: 100,
