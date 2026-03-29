@@ -59,7 +59,7 @@ class AuthService {
     if (!user)
       throw new ApiError({
         statusCode: "HTTP_401_UNAUTHORIZED",
-        message: "Invalid email",
+        message: "Invalid credentials",
       })
 
     const isValid = await hashUtil.comparePassword(password, user.password)
@@ -67,7 +67,7 @@ class AuthService {
     if (!isValid)
       throw new ApiError({
         statusCode: "HTTP_401_UNAUTHORIZED",
-        message: "Invalid password",
+        message: "Invalid credentials",
       })
 
     const accessToken = jwtUtil.generateAccessToken({
