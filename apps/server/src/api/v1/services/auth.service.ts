@@ -127,8 +127,39 @@ class AuthService {
       typeof decoded === "object" && "userId" in decoded
         ? decoded.userId
         : undefined
+    if (!userId)
+      throw new ApiError({
+        statusCode: "HTTP_401_UNAUTHORIZED",
+        message: "Invalid or corrupted token",
+      })
     await deleteSession(userId)
     return { success: true }
+  }
+
+  async session(token: string) {
+    const decoded = jwtUtil.verifyRefreshToken(token)
+    const userId =
+      typeof decoded === "object" && "userId" in decoded
+        ? decoded.userId
+        : undefined
+    if (!userId)
+      throw new ApiError({
+        statusCode: "HTTP_401_UNAUTHORIZED",
+        message: "Invalid or corrupted token",
+      })
+
+    const session = await getSession(userId)
+    if (!session)
+      throw new ApiError({
+        statusCode: "HTTP_401_UNAUTHORIZED",
+        message: "Session expired",
+      })
+
+    return {
+      success: true,
+      session,
+      userId,
+    }
   }
 }
 

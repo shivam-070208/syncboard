@@ -6,7 +6,11 @@ import ApiError from "@/utils/api-error"
 
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password } = req.body
-
+  if (!name || !email || !password)
+    throw new ApiError({
+      statusCode: "HTTP_400_BAD_REQUEST",
+      message: "Name, email, and password are required",
+    })
   const { accessToken, refreshToken, user } = await authService.signup(
     name,
     email,
@@ -25,7 +29,11 @@ export const signup = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body
-
+  if (!email || !password)
+    throw new ApiError({
+      statusCode: "HTTP_400_BAD_REQUEST",
+      message: "Name, email, and password are required",
+    })
   const { accessToken, refreshToken, user } = await authService.login(
     email,
     password
@@ -77,5 +85,20 @@ export const logout = async (req: Request, res: Response) => {
   return res.status(HTTPStatusCodes.HTTP_200_OK).json({
     success: true,
     message: "Logged out successfully",
+  })
+}
+
+export const session = async (req: Request, res: Response) => {
+  const token = req.cookies?.[AuthToken.REFRESH_TOKEN]
+  if (!token)
+    throw new ApiError({
+      statusCode: "HTTP_401_UNAUTHORIZED",
+      message: "Access token missing or expired",
+    })
+  const result = await authService.session(token)
+  return res.status(HTTPStatusCodes.HTTP_200_OK).json({
+    success: true,
+    userId: result.userId,
+    session: result.session,
   })
 }

@@ -1,5 +1,11 @@
 import { Router } from "express"
-import { signup, login, refresh, logout } from "@v1/controllers/auth.controller"
+import {
+  signup,
+  login,
+  refresh,
+  logout,
+  session,
+} from "@v1/controllers/auth.controller"
 import { tryCatch } from "@/utils/try-catch"
 
 const authRouter: Router = Router()
@@ -9,4 +15,5 @@ authRouter.post("/login", tryCatch(login))
 authRouter.post("/refresh", tryCatch(refresh))
 authRouter.post("/logout", tryCatch(logout))
 
+authRouter.get("/session", tryCatch(session))
 export default authRouter

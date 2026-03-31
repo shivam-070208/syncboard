@@ -1,4 +1,5 @@
 import jwt, { SignOptions } from "jsonwebtoken"
+import ApiError from "./api-error"
 
 class JwtUtil {
   private readonly accessSecret =
@@ -15,8 +16,6 @@ class JwtUtil {
     const options: SignOptions = { expiresIn: "7d" }
     return jwt.sign(payload, this.refreshSecret, options)
   }
-
-import ApiError from "./api-error"
 
   verifyAccessToken(token: string) {
     try {
