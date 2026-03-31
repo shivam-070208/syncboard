@@ -88,7 +88,7 @@ class AuthService {
     return {
       accessToken,
       refreshToken,
-      user: { ...session },
+      user: { ...user },
     }
   }
 
