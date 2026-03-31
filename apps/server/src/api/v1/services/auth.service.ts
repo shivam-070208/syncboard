@@ -2,8 +2,8 @@ import { query } from "@/config/db"
 import ApiError from "@/utils/api-error"
 import hashUtil from "@/utils/hash"
 import jwtUtil from "@/utils/jwt"
-import { redisClient } from "@/config/redis"
 import { deleteSession, getSession, setSession } from "@/utils/session"
+import type { Session, User } from "@workspace/shared"
 
 class AuthService {
   async signup(name: string, email: string, password: string) {
@@ -24,11 +24,11 @@ class AuthService {
     const result = await query(
       `INSERT INTO users (name, email, password)
        VALUES ($1, $2, $3)
-       RETURNING id, email, name`,
+       RETURNING id, email, name, is_premium, created_at`,
       [name, email, hashed]
     )
 
-    const user = result.rows[0]
+    const user = result.rows[0] as User
 
     const accessToken = jwtUtil.generateAccessToken({
       userId: user.id,
@@ -37,8 +37,7 @@ class AuthService {
     const refreshToken = jwtUtil.generateRefreshToken({
       userId: user.id,
     })
-    if (user.password) delete user.password
-    const session = {
+    const session: Session = {
       user,
       refreshToken,
     }
@@ -56,7 +55,7 @@ class AuthService {
   async login(email: string, password: string) {
     const result = await query(`SELECT * FROM users WHERE email = $1`, [email])
 
-    const user = result.rows[0]
+    const user = result.rows[0] as (User & { password: string }) | undefined
 
     if (!user)
       throw new ApiError({
@@ -79,16 +78,16 @@ class AuthService {
     const refreshToken = jwtUtil.generateRefreshToken({
       userId: user.id,
     })
-    if (user.password) delete user.password
-    const session = {
-      ...user,
+    const { password: _password, ...safeUser } = user
+    const session: Session = {
+      user: { ...safeUser },
       refreshToken,
     }
     await setSession(user.id, session)
     return {
       accessToken,
       refreshToken,
-      user: { ...user },
+      user: { ...safeUser },
     }
   }
 
