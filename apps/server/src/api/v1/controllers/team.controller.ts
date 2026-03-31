@@ -7,7 +7,12 @@ import { RequestWithSession } from "@/types/request-with-session"
 export const createTeam = async (req: Request, res: Response) => {
   const userId = (req as RequestWithSession).session.user.id
   const { name } = req.body
-
+  if (typeof name !== "string" || !name.trim()) {
+    throw new ApiError({
+      statusCode: "HTTP_400_BAD_REQUEST",
+      message: "name is required.",
+    })
+  }
   const team = await teamService.createTeam(userId, name)
 
   return res.status(HTTPStatusCodes.HTTP_201_CREATED).json({
@@ -40,7 +45,7 @@ export const updateTeamName = async (req: Request, res: Response) => {
       message: "teamId is required.",
     })
   }
-  if (!name) {
+  if (typeof name !== "string" || !name.trim()) {
     throw new ApiError({
       statusCode: "HTTP_400_BAD_REQUEST",
       message: "name is required.",
