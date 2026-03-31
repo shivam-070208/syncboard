@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import type { User } from "@/modules/auth/hooks/use-auth"
+import type { User } from "@workspace/shared"
 
 export type AuthState = {
   user: User | null

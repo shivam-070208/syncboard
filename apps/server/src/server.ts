@@ -4,7 +4,7 @@ import http from "http"
 import { Server as SocketIOServer } from "socket.io"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-import { authRouter } from "@v1/routes"
+import { authRouter, teamRouter } from "@v1/routes"
 import morgan from "morgan"
 
 const app = express()
@@ -32,6 +32,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use("/api/v1/auth", authRouter)
+app.use("/api/v1/team", teamRouter)
 const io = new SocketIOServer(server, {
   cors: {
     origin: allowedOrigins,

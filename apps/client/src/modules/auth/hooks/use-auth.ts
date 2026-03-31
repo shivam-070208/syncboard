@@ -3,12 +3,7 @@ import axiosClient from "@/config/axios-client"
 import { AxiosError } from "axios"
 import { useAppDispatch, useAppSelector } from "@/store"
 import { clearCredentials, setCredentials } from "@/store/authSlice"
-
-export type User = {
-  id: string
-  name: string
-  email: string
-}
+import type { User, Session } from "@workspace/shared"
 
 export type SignupInput = {
   name: string
@@ -40,12 +35,6 @@ export type RefreshResponse = {
 export type LogoutResponse = {
   success: boolean
   message: string
-}
-
-export type Session = {
-  user: User
-  refreshToken?: string
-  [key: string]: unknown
 }
 
 export type SessionResponse = {
