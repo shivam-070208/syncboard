@@ -20,7 +20,7 @@ CREATE TABLE workspaces (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
   title TEXT DEFAULT 'Untitled Workspace',
-  created_by UUID REFERENCES users(id),
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
