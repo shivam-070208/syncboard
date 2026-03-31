@@ -98,7 +98,7 @@ export const session = async (req: Request, res: Response) => {
   const result = await authService.session(token)
   return res.status(HTTPStatusCodes.HTTP_200_OK).json({
     success: true,
-    userId: result.userId,
+    userId: result.user,
     session: result.session,
   })
 }

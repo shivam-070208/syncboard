@@ -37,17 +37,19 @@ class AuthService {
     const refreshToken = jwtUtil.generateRefreshToken({
       userId: user.id,
     })
+    if (user.password) delete user.password
     const session = {
-      ...user,
+      user,
       refreshToken,
     }
-    if (session.password) delete session.password
     await setSession(user.id, session)
 
     return {
       accessToken,
       refreshToken,
-      user: { id: user.id, email: user.email, name: user.name },
+      user: {
+        ...user,
+      },
     }
   }
 
@@ -77,17 +79,16 @@ class AuthService {
     const refreshToken = jwtUtil.generateRefreshToken({
       userId: user.id,
     })
-
+    if (user.password) delete user.password
     const session = {
       ...user,
       refreshToken,
     }
-    if (session.password) delete session.password
     await setSession(user.id, session)
     return {
       accessToken,
       refreshToken,
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { ...session },
     }
   }
 
@@ -149,7 +150,7 @@ class AuthService {
       })
 
     const session = await getSession(userId)
-    if (!session)
+    if (!session || !session.user)
       throw new ApiError({
         statusCode: "HTTP_401_UNAUTHORIZED",
         message: "Session expired",
@@ -157,8 +158,8 @@ class AuthService {
 
     return {
       success: true,
-      session,
-      userId,
+      user: { ...session.user },
+      session: session,
     }
   }
 }
