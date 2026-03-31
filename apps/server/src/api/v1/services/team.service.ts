@@ -80,7 +80,12 @@ class TeamService {
 
   async getTeamById(teamId: string, userId: string) {
     const result = await query(
-      `SELECT id, name, owner_id, created_at FROM teams WHERE id = $1 AND owner_id = $2`,
+      `
+      SELECT DISTINCT t.id, t.name, t.owner_id, t.created_at
+      FROM teams t
+      LEFT JOIN team_members tm ON tm.team_id = t.id
+      WHERE t.id = $1 AND (t.owner_id = $2 OR tm.user_id = $2)
+      `,
       [teamId, userId]
     )
 
