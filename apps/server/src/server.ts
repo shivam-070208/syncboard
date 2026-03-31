@@ -5,6 +5,7 @@ import { Server as SocketIOServer } from "socket.io"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import { authRouter } from "@v1/routes"
+import morgan from "morgan"
 
 const app = express()
 const server = http.createServer(app)
@@ -13,6 +14,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
   : ["http://localhost:3000"]
 
+app.use(morgan("dev"))
 app.use(
   cors({
     origin: (origin, callback) => {
