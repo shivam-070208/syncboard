@@ -1,1 +1,1 @@
-export const ORGANISATION_NAME = "syncboard"
+export const ORGANISATION_NAME = "SyncBoard"

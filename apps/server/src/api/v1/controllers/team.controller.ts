@@ -83,3 +83,19 @@ export const getTeamById = async (req: Request, res: Response) => {
     team,
   })
 }
+
+export const joinTeam = async (req: Request, res: Response) => {
+  const userId = (req as RequestWithSession).session.user.id
+  const { teamId } = req.body
+
+  if (typeof teamId !== "string" || !teamId.trim()) {
+    throw new ApiError({
+      statusCode: "HTTP_400_BAD_REQUEST",
+      message: "teamId is required.",
+    })
+  }
+
+  const result = await teamService.joinTeam(userId, teamId)
+
+  return res.status(HTTPStatusCodes.HTTP_200_OK).json(result)
+}

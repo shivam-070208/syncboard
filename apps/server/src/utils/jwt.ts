@@ -36,7 +36,7 @@ class JwtUtil {
     } catch (err) {
       throw new ApiError({
         statusCode: "HTTP_401_UNAUTHORIZED",
-        message: "Invalid or expired access token",
+        message: "Invalid or expired accessesss token",
         cause: err,
       })
     }

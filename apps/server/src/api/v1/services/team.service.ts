@@ -98,6 +98,34 @@ class TeamService {
 
     return result.rows[0]
   }
+
+  async joinTeam(userId: string, teamId: string) {
+    const teamResult = await query(`SELECT id FROM teams WHERE id = $1`, [
+      teamId,
+    ])
+    if (teamResult.rows.length === 0) {
+      throw new ApiError({
+        statusCode: "HTTP_404_NOT_FOUND",
+        message: "Team not found",
+      })
+    }
+
+    const membership = await query(
+      `SELECT id FROM team_members WHERE team_id = $1 AND user_id = $2`,
+      [teamId, userId]
+    )
+
+    if (membership.rows.length > 0) {
+      return { success: true, message: "Already joined this team" }
+    }
+
+    await query(`INSERT INTO team_members (team_id, user_id) VALUES ($1, $2)`, [
+      teamId,
+      userId,
+    ])
+
+    return { success: true, message: "Joined team successfully" }
+  }
 }
 
 export default new TeamService()
