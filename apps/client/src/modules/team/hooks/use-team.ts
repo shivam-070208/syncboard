@@ -28,6 +28,10 @@ type JoinTeamResponse = {
   message: string
 }
 
+type SearchTeamsInput = {
+  q: string
+}
+
 const listTeamsRequest = async (): Promise<ListTeamsResponse> => {
   try {
     const res = await axiosClient.get<ListTeamsResponse>("/team")
@@ -68,11 +72,55 @@ const joinTeamRequest = async (
   }
 }
 
+const searchTeamsRequest = async (
+  input: SearchTeamsInput
+): Promise<ListTeamsResponse> => {
+  try {
+    const res = await axiosClient.get<ListTeamsResponse>("/team/search", {
+      params: { q: input.q },
+    })
+    return res.data
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      throw new Error(err.response?.data?.message || "Unable to search teams")
+    }
+    throw new Error("Unable to search teams")
+  }
+}
+
+const requestJoinTeamRequest = async (
+  input: JoinTeamInput
+): Promise<JoinTeamResponse> => {
+  try {
+    const res = await axiosClient.post<JoinTeamResponse>(
+      "/team/request-join",
+      input
+    )
+    return res.data
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      throw new Error(
+        err.response?.data?.message || "Unable to request join team"
+      )
+    }
+    throw new Error("Unable to request join team")
+  }
+}
+
 export function useTeams() {
   return useQuery<ListTeamsResponse, unknown>({
     queryKey: ["team", "list"],
     queryFn: listTeamsRequest,
     staleTime: 30_000,
+  })
+}
+
+export function useSearchTeams(q: string) {
+  return useQuery<ListTeamsResponse, unknown>({
+    queryKey: ["team", "search", q],
+    queryFn: () => searchTeamsRequest({ q }),
+    enabled: q.trim().length > 0,
+    staleTime: 10_000,
   })
 }
 
@@ -82,6 +130,7 @@ export function useCreateTeam() {
     mutationFn: createTeamRequest,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team", "list"] })
+      queryClient.invalidateQueries({ queryKey: ["team", "search"] })
     },
   })
 }
@@ -92,6 +141,16 @@ export function useJoinTeam() {
     mutationFn: joinTeamRequest,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team", "list"] })
+    },
+  })
+}
+
+export function useRequestJoinTeam() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: requestJoinTeamRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team", "search"] })
     },
   })
 }

@@ -3,19 +3,24 @@
 import { useMemo, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { Sidebar, SidebarBody } from "@workspace/ui/components/sidebar"
 import {
-  Sidebar,
-  SidebarBody,
-  SidebarLink,
-} from "@workspace/ui/components/sidebar"
-import { FiGrid, FiLogOut, FiUsers } from "react-icons/fi"
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  SelectGroup,
+  SelectLabel,
+} from "@workspace/ui/components/select"
 import LogoIcon from "@/components/common/logo-icon"
+import ProfileDropdown from "@/components/common/profile-dropdown"
 import { useLogout, useSession } from "@/modules/auth/hooks/use-auth"
 import { useTeams } from "@/modules/team/hooks/use-team"
 
 const TEAM_STORAGE_KEY = "syncboard:selectedTeamId"
 
-export default function DashboardSidebar() {
+const DashboardSidebar = () => {
   const router = useRouter()
   const pathname = usePathname()
   const { data: sessionData } = useSession()
@@ -27,7 +32,6 @@ export default function DashboardSidebar() {
     if (typeof window === "undefined") return ""
     return window.localStorage.getItem(TEAM_STORAGE_KEY) ?? ""
   })
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const selectedTeamId = useMemo(() => {
     const matchedTeamId = pathname?.match(/^\/dashboard\/([^/]+)$/)?.[1]
     if (matchedTeamId && teams.some((team) => team.id === matchedTeamId)) {
@@ -39,32 +43,9 @@ export default function DashboardSidebar() {
     return ""
   }, [pathname, storedTeamId, teams])
 
-  const selectedTeamName = useMemo(() => {
-    return (
-      teams.find((team) => team.id === selectedTeamId)?.name || "Select team"
-    )
-  }, [selectedTeamId, teams])
-
-  const links = [
-    {
-      label: "All boards",
-      href: "/dashboard/all",
-      icon: (
-        <FiGrid className="h-4 w-4 text-neutral-600 dark:text-neutral-300" />
-      ),
-    },
-    {
-      label: "Members",
-      href: "#",
-      icon: (
-        <FiUsers className="h-4 w-4 text-neutral-600 dark:text-neutral-300" />
-      ),
-    },
-  ]
-
   const onSelectTeam = (teamId: string) => {
     setStoredTeamId(teamId)
-    if (!teamId) {
+    if (!teamId || teamId == "_") {
       router.push("/dashboard/all")
       return
     }
@@ -74,65 +55,58 @@ export default function DashboardSidebar() {
 
   return (
     <>
-      <Sidebar animate>
-        <SidebarBody className="justify-between border-r border-neutral-200/70 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+      <Sidebar animate={false}>
+        <SidebarBody className="h-dvh justify-between border-r border-neutral-200/70 bg-white dark:border-neutral-800 dark:bg-neutral-950">
           <div className="space-y-6">
             <div className="flex items-center gap-2">
-              <Link href="/dashboard/all" className="shrink-0">
-                <LogoIcon width={30} height={30} />
-              </Link>
-              <select
-                value={selectedTeamId}
-                onChange={(event) => onSelectTeam(event.target.value)}
-                className="h-9 w-full rounded-md border border-neutral-300 bg-white px-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              <Link
+                href="/dashboard/all"
+                className="flex items-center gap-2 text-sm font-bold text-neutral-700 dark:text-neutral-200"
               >
-                <option value="">All teams</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </select>
+                <LogoIcon width={28} height={28} />
+                <span>SyncBoard</span>
+              </Link>
             </div>
 
             <div className="space-y-1">
-              {links.map((link) => (
-                <SidebarLink key={link.label} link={link} />
-              ))}
+              <Select
+                value={selectedTeamId ?? ""}
+                onValueChange={(v) => onSelectTeam(v)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select team" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Teams</SelectLabel>
+                    <SelectItem key="all" value="_">
+                      All Teams
+                    </SelectItem>
+                    {teams.map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <div className="relative">
-            <button
-              onClick={() => setIsUserMenuOpen((prev) => !prev)}
-              className="flex w-full items-center justify-between rounded-md border border-neutral-200 px-3 py-2 text-left text-sm dark:border-neutral-700"
-            >
-              <span className="truncate">
-                {sessionData?.user?.name || "Account"}
-              </span>
-              <span className="text-xs text-neutral-500">
-                {selectedTeamName}
-              </span>
-            </button>
-
-            {isUserMenuOpen && (
-              <div className="absolute bottom-12 left-0 w-full rounded-md border border-neutral-200 bg-white p-1 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-                <button
-                  onClick={() => {
-                    logout(undefined, {
-                      onSuccess: () => router.push("/login"),
-                    })
-                  }}
-                  className="flex w-full items-center gap-2 rounded px-2 py-2 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                >
-                  <FiLogOut className="h-4 w-4" />
-                  Logout
-                </button>
-              </div>
-            )}
+          <div className="pb-2">
+            <ProfileDropdown
+              userName={sessionData?.user?.name || "Account"}
+              onLogout={() => {
+                logout(undefined, {
+                  onSuccess: () => router.push("/login"),
+                })
+              }}
+            />
           </div>
         </SidebarBody>
       </Sidebar>
     </>
   )
 }
+
+export default DashboardSidebar
