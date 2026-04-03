@@ -126,6 +126,52 @@ class TeamService {
 
     return { success: true, message: "Joined team successfully" }
   }
+
+  async searchTeams(queryText: string) {
+    const wildcard = `%${queryText.trim().toLowerCase()}%`
+    const result = await query(
+      `SELECT id, name, owner_id, created_at FROM teams WHERE LOWER(name) LIKE $1 ORDER BY created_at DESC LIMIT 50`,
+      [wildcard]
+    )
+    return result.rows
+  }
+
+  async requestJoinTeam(userId: string, teamId: string) {
+    const teamResult = await query(`SELECT id FROM teams WHERE id = $1`, [
+      teamId,
+    ])
+    if (teamResult.rows.length === 0) {
+      throw new ApiError({
+        statusCode: "HTTP_404_NOT_FOUND",
+        message: "Team not found",
+      })
+    }
+
+    const membership = await query(
+      `SELECT id FROM team_members WHERE team_id = $1 AND user_id = $2`,
+      [teamId, userId]
+    )
+
+    if (membership.rows.length > 0) {
+      return { success: true, message: "You are already a member of this team" }
+    }
+
+    const existingRequest = await query(
+      `SELECT id FROM team_join_requests WHERE team_id = $1 AND user_id = $2`,
+      [teamId, userId]
+    )
+
+    if (existingRequest.rows.length > 0) {
+      return { success: true, message: "Request already pending" }
+    }
+
+    await query(
+      `INSERT INTO team_join_requests (team_id, user_id, status) VALUES ($1, $2, 'pending')`,
+      [teamId, userId]
+    )
+
+    return { success: true, message: "Join request sent" }
+  }
 }
 
 export default new TeamService()

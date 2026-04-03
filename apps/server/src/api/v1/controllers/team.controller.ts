@@ -99,3 +99,26 @@ export const joinTeam = async (req: Request, res: Response) => {
 
   return res.status(HTTPStatusCodes.HTTP_200_OK).json(result)
 }
+
+export const searchTeams = async (req: Request, res: Response) => {
+  const userId = (req as RequestWithSession).session.user.id
+  const queryText = String(req.query.q || "").trim()
+
+  const teams = await teamService.searchTeams(queryText)
+  return res.status(HTTPStatusCodes.HTTP_200_OK).json({ success: true, teams })
+}
+
+export const requestJoinTeam = async (req: Request, res: Response) => {
+  const userId = (req as RequestWithSession).session.user.id
+  const { teamId } = req.body
+
+  if (typeof teamId !== "string" || !teamId.trim()) {
+    throw new ApiError({
+      statusCode: "HTTP_400_BAD_REQUEST",
+      message: "teamId is required.",
+    })
+  }
+
+  const result = await teamService.requestJoinTeam(userId, teamId)
+  return res.status(HTTPStatusCodes.HTTP_200_OK).json(result)
+}
