@@ -122,3 +122,54 @@ export const requestJoinTeam = async (req: Request, res: Response) => {
   const result = await teamService.requestJoinTeam(userId, teamId)
   return res.status(HTTPStatusCodes.HTTP_200_OK).json(result)
 }
+
+export const listTeamJoinRequests = async (req: Request, res: Response) => {
+  const userId = (req as RequestWithSession).session.user.id
+  const teamId = req.params.teamId as string
+
+  if (!teamId) {
+    throw new ApiError({
+      statusCode: "HTTP_400_BAD_REQUEST",
+      message: "teamId is required.",
+    })
+  }
+
+  const requests = await teamService.listTeamJoinRequests(teamId, userId)
+
+  return res.status(HTTPStatusCodes.HTTP_200_OK).json({
+    success: true,
+    requests,
+  })
+}
+
+export const approveJoinRequest = async (req: Request, res: Response) => {
+  const userId = (req as RequestWithSession).session.user.id
+  const requestId = req.params.requestId as string
+
+  if (!requestId) {
+    throw new ApiError({
+      statusCode: "HTTP_400_BAD_REQUEST",
+      message: "requestId is required.",
+    })
+  }
+
+  const result = await teamService.approveJoinRequest(requestId, userId)
+
+  return res.status(HTTPStatusCodes.HTTP_200_OK).json(result)
+}
+
+export const rejectJoinRequest = async (req: Request, res: Response) => {
+  const userId = (req as RequestWithSession).session.user.id
+  const requestId = req.params.requestId as string
+
+  if (!requestId) {
+    throw new ApiError({
+      statusCode: "HTTP_400_BAD_REQUEST",
+      message: "requestId is required.",
+    })
+  }
+
+  const result = await teamService.rejectJoinRequest(requestId, userId)
+
+  return res.status(HTTPStatusCodes.HTTP_200_OK).json(result)
+}

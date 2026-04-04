@@ -1,3 +1,4 @@
 import authRouter from "./auth.route"
 import teamRouter from "./team.route"
-export { authRouter, teamRouter }
+import workspaceRouter from "./workspace.route"
+export { authRouter, teamRouter, workspaceRouter }

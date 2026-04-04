@@ -35,3 +35,8 @@ export type TeamJoinRequest = {
   status: string
   created_at: string
 }
+
+export type TeamJoinRequestWithUser = TeamJoinRequest & {
+  user_name: string
+  user_email: string
+}
