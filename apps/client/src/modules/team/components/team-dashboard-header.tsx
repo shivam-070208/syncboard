@@ -25,7 +25,14 @@ const TeamDashboardHeader = ({
   }
 
   const handleDeleteTeam = async () => {
-    await deleteTeamMutation.mutateAsync({ teamId: team.id })
+    if (!window.confirm(`Are you sure you want to delete team "${localName}"? This action cannot be undone.`)) {
+      return
+    }
+    try {
+      await deleteTeamMutation.mutateAsync({ teamId: team.id })
+    } catch (error) {
+      console.error("Failed to delete team:", error)
+    }
   }
 
   return (
