@@ -172,6 +172,90 @@ class TeamService {
 
     return { success: true, message: "Join request sent" }
   }
+
+  async listTeamJoinRequests(teamId: string, userId: string) {
+    // Check if user is team owner
+    const teamResult = await query(
+      `SELECT id FROM teams WHERE id = $1 AND owner_id = $2`,
+      [teamId, userId]
+    )
+
+    if (teamResult.rows.length === 0) {
+      throw new ApiError({
+        statusCode: "HTTP_403_FORBIDDEN",
+        message: "You are not the owner of this team",
+      })
+    }
+
+    const result = await query(
+      `SELECT tjr.id, tjr.team_id, tjr.user_id, tjr.status, tjr.created_at,
+              u.name as user_name, u.email as user_email
+       FROM team_join_requests tjr
+       LEFT JOIN users u ON u.id = tjr.user_id
+       WHERE tjr.team_id = $1 AND tjr.status = 'pending'
+       ORDER BY tjr.created_at ASC`,
+      [teamId]
+    )
+
+    return result.rows
+  }
+
+  async approveJoinRequest(requestId: string, userId: string) {
+    // Get the request and check if user is team owner
+    const requestResult = await query(
+      `SELECT tjr.team_id, tjr.user_id FROM team_join_requests tjr
+       LEFT JOIN teams t ON t.id = tjr.team_id
+       WHERE tjr.id = $1 AND t.owner_id = $2`,
+      [requestId, userId]
+    )
+
+    if (requestResult.rows.length === 0) {
+      throw new ApiError({
+        statusCode: "HTTP_403_FORBIDDEN",
+        message: "You don't have permission to approve this request",
+      })
+    }
+
+    const { team_id, user_id } = requestResult.rows[0]
+
+    // Add user to team members
+    await query(`INSERT INTO team_members (team_id, user_id) VALUES ($1, $2)`, [
+      team_id,
+      user_id,
+    ])
+
+    // Update request status
+    await query(
+      `UPDATE team_join_requests SET status = 'approved' WHERE id = $1`,
+      [requestId]
+    )
+
+    return { success: true, message: "Join request approved" }
+  }
+
+  async rejectJoinRequest(requestId: string, userId: string) {
+    // Check if user is team owner
+    const requestResult = await query(
+      `SELECT tjr.id FROM team_join_requests tjr
+       LEFT JOIN teams t ON t.id = tjr.team_id
+       WHERE tjr.id = $1 AND t.owner_id = $2`,
+      [requestId, userId]
+    )
+
+    if (requestResult.rows.length === 0) {
+      throw new ApiError({
+        statusCode: "HTTP_403_FORBIDDEN",
+        message: "You don't have permission to reject this request",
+      })
+    }
+
+    await query(
+      `UPDATE team_join_requests SET status = 'rejected' WHERE id = $1`,
+      [requestId]
+    )
+
+    return { success: true, message: "Join request rejected" }
+  }
 }
 
 export default new TeamService()

@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { AxiosError } from "axios"
 import axiosClient from "@/config/axios-client"
-import type { Team } from "@workspace/shared"
+import type { Team, TeamJoinRequestWithUser } from "@workspace/shared"
 
 type ListTeamsResponse = {
   success: boolean
@@ -30,6 +30,25 @@ type JoinTeamResponse = {
 
 type SearchTeamsInput = {
   q: string
+}
+
+type ListJoinRequestsResponse = {
+  success: boolean
+  requests: TeamJoinRequestWithUser[]
+}
+
+type JoinRequestActionResponse = {
+  success: boolean
+  message: string
+}
+
+type UpdateTeamNameInput = {
+  name: string
+}
+
+type DeleteTeamResponse = {
+  success: boolean
+  message: string
 }
 
 const listTeamsRequest = async (): Promise<ListTeamsResponse> => {
@@ -107,6 +126,94 @@ const requestJoinTeamRequest = async (
   }
 }
 
+const listTeamJoinRequestsRequest = async (
+  teamId: string
+): Promise<ListJoinRequestsResponse> => {
+  try {
+    const res = await axiosClient.get<ListJoinRequestsResponse>(
+      `/team/${teamId}/join-requests`
+    )
+    return res.data
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      throw new Error(
+        err.response?.data?.message || "Unable to fetch join requests"
+      )
+    }
+    throw new Error("Unable to fetch join requests")
+  }
+}
+
+const approveJoinRequestRequest = async (
+  requestId: string
+): Promise<JoinRequestActionResponse> => {
+  try {
+    const res = await axiosClient.patch<JoinRequestActionResponse>(
+      `/team/join-request/${requestId}/approve`
+    )
+    return res.data
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      throw new Error(
+        err.response?.data?.message || "Unable to approve join request"
+      )
+    }
+    throw new Error("Unable to approve join request")
+  }
+}
+
+const rejectJoinRequestRequest = async (
+  requestId: string
+): Promise<JoinRequestActionResponse> => {
+  try {
+    const res = await axiosClient.patch<JoinRequestActionResponse>(
+      `/team/join-request/${requestId}/reject`
+    )
+    return res.data
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      throw new Error(
+        err.response?.data?.message || "Unable to reject join request"
+      )
+    }
+    throw new Error("Unable to reject join request")
+  }
+}
+
+const updateTeamNameRequest = async (
+  teamId: string,
+  input: UpdateTeamNameInput
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const res = await axiosClient.patch<{ success: boolean; message: string }>(
+      `/team/${teamId}`,
+      input
+    )
+    return res.data
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      throw new Error(
+        err.response?.data?.message || "Unable to update team name"
+      )
+    }
+    throw new Error("Unable to update team name")
+  }
+}
+
+const deleteTeamRequest = async (
+  teamId: string
+): Promise<DeleteTeamResponse> => {
+  try {
+    const res = await axiosClient.delete<DeleteTeamResponse>(`/team/${teamId}`)
+    return res.data
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      throw new Error(err.response?.data?.message || "Unable to delete team")
+    }
+    throw new Error("Unable to delete team")
+  }
+}
+
 export function useTeams() {
   return useQuery<ListTeamsResponse, unknown>({
     queryKey: ["team", "list"],
@@ -151,6 +258,60 @@ export function useRequestJoinTeam() {
     mutationFn: requestJoinTeamRequest,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team", "search"] })
+    },
+  })
+}
+
+export function useTeamJoinRequests(teamId: string) {
+  return useQuery<ListJoinRequestsResponse, unknown>({
+    queryKey: ["team", "join-requests", teamId],
+    queryFn: () => listTeamJoinRequestsRequest(teamId),
+    enabled: !!teamId,
+    staleTime: 30_000,
+  })
+}
+
+export function useApproveJoinRequest() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: approveJoinRequestRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team", "join-requests"] })
+      queryClient.invalidateQueries({ queryKey: ["team", "list"] })
+    },
+  })
+}
+
+export function useRejectJoinRequest() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: rejectJoinRequestRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team", "join-requests"] })
+    },
+  })
+}
+
+export function useUpdateTeamName() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      teamId,
+      ...input
+    }: { teamId: string } & UpdateTeamNameInput) =>
+      updateTeamNameRequest(teamId, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team", "list"] })
+    },
+  })
+}
+
+export function useDeleteTeam() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: deleteTeamRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team", "list"] })
     },
   })
 }
