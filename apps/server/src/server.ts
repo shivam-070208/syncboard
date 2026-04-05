@@ -6,6 +6,9 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import { authRouter, teamRouter, workspaceRouter } from "@v1/routes"
 import morgan from "morgan"
+import { registerWorkspaceSockets } from "@/realtime/workspace.socket"
+import { initWorkspaceRedisFanout } from "@/realtime/redis-workspace-fanout"
+import { startBackgroundWorkers } from "@/jobs/start-workers"
 
 const app = express()
 const server = http.createServer(app)
@@ -41,13 +44,9 @@ const io = new SocketIOServer(server, {
   },
 })
 
-io.on("connection", (socket) => {
-  console.log("A user connected via WebSocket:", socket.id)
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id)
-  })
-})
+initWorkspaceRedisFanout(io)
+registerWorkspaceSockets(io)
+startBackgroundWorkers()
 
 app.get("/", (req, res) => {
   res.send("Hello from Express!")

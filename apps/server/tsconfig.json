@@ -11,6 +11,6 @@
       "@workspace/shared/*": ["../../packages/shared/src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/api/v1/routes/auth"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/api/v1/routes/auth"],
   "exclude": ["node_modules", "dist"]
 }

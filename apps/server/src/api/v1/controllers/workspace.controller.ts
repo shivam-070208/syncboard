@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import workspaceService from "@v1/services/workspace.service"
+import workspaceDocumentService from "@v1/services/workspace-document.service"
 import { HTTPStatusCodes } from "@workspace/shared"
 import ApiError from "@/utils/api-error"
 import { RequestWithSession } from "@/types/request-with-session"
@@ -62,6 +63,28 @@ export const getWorkspaceById = async (req: Request, res: Response) => {
   return res.status(HTTPStatusCodes.HTTP_200_OK).json({
     success: true,
     workspace,
+  })
+}
+
+export const getWorkspaceDocument = async (req: Request, res: Response) => {
+  const userId = (req as RequestWithSession).session.user.id
+  const workspaceId = req.params.workspaceId as string
+
+  if (!workspaceId) {
+    throw new ApiError({
+      statusCode: "HTTP_400_BAD_REQUEST",
+      message: "workspaceId is required.",
+    })
+  }
+
+  const document = await workspaceDocumentService.getDocument(
+    workspaceId,
+    userId
+  )
+
+  return res.status(HTTPStatusCodes.HTTP_200_OK).json({
+    success: true,
+    document,
   })
 }
 
