@@ -1,4 +1,5 @@
 export * from "./http-staus-code"
+export * from "./socket-events"
 export * from "./auth-token"
 export * from "./types/user"
 export * from "./types/session"

@@ -6,7 +6,7 @@ import workspaceService from "@v1/services/workspace.service"
 import { redisClient } from "@/config/redis"
 import { workspacePersistQueue } from "@/jobs/workspace-persist.queue"
 import { parseCookie } from "cookie"
-
+import { SocketEvents } from "@workspace/shared"
 export type WorkspaceRemoteSyncPayload = {
   userId: string
   source: "editor" | "canvas"
@@ -17,8 +17,6 @@ export type WorkspaceRemoteSyncPayload = {
 export function registerWorkspaceSockets(io: SocketIOServer): void {
   io.use(async (socket, next) => {
     try {
-      // Defensive: check cookie import & header exist
-
       const headerCookie = socket.handshake?.headers?.cookie ?? ""
       if (typeof headerCookie !== "string") {
         next(new Error("Unauthorized"))
@@ -43,11 +41,11 @@ export function registerWorkspaceSockets(io: SocketIOServer): void {
     }
   })
 
-  io.on("connection", (socket) => {
+  io.on(SocketEvents.CONNECTION, (socket) => {
     const userId = socket.data.userId as string
 
     socket.on(
-      "workspace:join",
+      SocketEvents.JOIN,
       async (workspaceId: unknown, ack?: (r: unknown) => void) => {
         try {
           if (typeof workspaceId !== "string" || !workspaceId) {
@@ -63,13 +61,13 @@ export function registerWorkspaceSockets(io: SocketIOServer): void {
       }
     )
 
-    socket.on("workspace:leave", async (workspaceId: unknown) => {
+    socket.on(SocketEvents.LEAVE, async (workspaceId: unknown) => {
       if (typeof workspaceId !== "string" || !workspaceId) return
       await socket.leave(`workspace:${workspaceId}`)
     })
 
     socket.on(
-      "workspace:sync",
+      SocketEvents.SYNC,
       async (
         msg: { workspaceId?: string; source?: string; payload?: unknown },
         ack?: (r: unknown) => void

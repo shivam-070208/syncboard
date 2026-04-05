@@ -1,8 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axiosClient from "@/config/axios-client"
 import { AxiosError } from "axios"
-import { useAppDispatch, useAppSelector } from "@/store"
-import { clearCredentials, setCredentials } from "@/store/authSlice"
 import type { User, Session } from "@workspace/shared"
 
 export type SignupInput = {
@@ -115,16 +113,9 @@ export function useSignup() {
 
 export function useLogin() {
   const queryClient = useQueryClient()
-  const dispatch = useAppDispatch()
   return useMutation({
     mutationFn: loginRequest,
-    onSuccess: (data) => {
-      dispatch(
-        setCredentials({
-          user: data.user,
-          accessToken: data.accessToken,
-        })
-      )
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["auth", "session"] })
     },
   })
@@ -142,18 +133,15 @@ export function useRefresh() {
 
 export function useLogout() {
   const queryClient = useQueryClient()
-  const dispatch = useAppDispatch()
   return useMutation({
     mutationFn: logoutRequest,
     onSuccess: () => {
-      dispatch(clearCredentials())
       queryClient.invalidateQueries({ queryKey: ["auth", "session"] })
     },
   })
 }
 
 export function useSession(options?: { enabled?: boolean }) {
-  useAppSelector((state: { auth: unknown }) => state.auth)
   return useQuery<SessionResponse, unknown>({
     queryKey: ["auth", "session"],
     queryFn: sessionRequest,

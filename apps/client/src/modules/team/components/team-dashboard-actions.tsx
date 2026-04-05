@@ -17,7 +17,6 @@ import {
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { FaPlus, FaUsers, FaCheck, FaTimes } from "react-icons/fa"
 import { useState } from "react"
-
 import { useCreateWorkspace } from "@/modules/workspace/hooks/use-workspace"
 
 type JoinRequest = {
