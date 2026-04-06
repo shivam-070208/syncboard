@@ -62,7 +62,7 @@ const WorkspaceExcalidrawStage = ({
         source: "canvas",
         payload,
       })
-    }, 0)
+    }, 120)
   ).current
 
   // ✅ Handle incoming updates
