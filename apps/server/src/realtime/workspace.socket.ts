@@ -7,12 +7,7 @@ import { redisClient } from "@/config/redis"
 import { workspacePersistQueue } from "@/jobs/workspace-persist.queue"
 import { parseCookie } from "cookie"
 import { SocketEvents } from "@workspace/shared"
-export type WorkspaceRemoteSyncPayload = {
-  userId: string
-  source: "editor" | "canvas"
-  payload: unknown
-  ts: number
-}
+import type { WorkspaceRemoteSyncPayload, PayloadData } from "@workspace/shared"
 
 export function registerWorkspaceSockets(io: SocketIOServer): void {
   io.use(async (socket, next) => {
@@ -69,7 +64,7 @@ export function registerWorkspaceSockets(io: SocketIOServer): void {
     socket.on(
       SocketEvents.SYNC,
       async (
-        msg: { workspaceId?: string; source?: string; payload?: unknown },
+        msg: { workspaceId?: string; source?: string; payload?: PayloadData },
         ack?: (r: unknown) => void
       ) => {
         try {
@@ -93,13 +88,12 @@ export function registerWorkspaceSockets(io: SocketIOServer): void {
             return
           }
 
-          await workspaceService.getWorkspaceById(workspaceId, userId)
-
           const envelope: WorkspaceRemoteSyncPayload = {
             userId,
             source,
             payload,
             ts: Date.now(),
+            socketId: socket.id,
           }
 
           const channel = `workspace:${workspaceId}:collab`

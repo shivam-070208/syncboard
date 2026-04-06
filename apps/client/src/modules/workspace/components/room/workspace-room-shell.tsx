@@ -1,10 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { WorkspaceNavbar } from "@/modules/workspace/components/room/workspace-navbar"
 import { WorkspaceEditorDock } from "@/modules/workspace/components/room/workspace-editor-dock"
 import { WorkspaceExcalidrawStage } from "@/modules/workspace/components/room/workspace-excalidraw-stage"
 import { cn } from "@workspace/ui/lib/utils"
+import { useSocket } from "@/components/providers/socket-provider"
+import { SocketEvents } from "@workspace/shared"
 
 type WorkspaceRoomShellProps = {
   workspaceId: string
@@ -26,7 +28,15 @@ export function WorkspaceRoomShell({
   canvasSeed,
 }: WorkspaceRoomShellProps) {
   const [editorOpen, setEditorOpen] = useState(true)
+  const { connected, socket } = useSocket()
 
+  useEffect(() => {
+    if (!connected || !socket) return
+    socket.emit(SocketEvents.JOIN, workspaceId)
+    return () => {
+      socket.emit(SocketEvents.LEAVE, workspaceId)
+    }
+  }, [connected, socket, workspaceId])
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
       <WorkspaceNavbar
