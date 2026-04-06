@@ -68,6 +68,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       socket.off(SocketEvents.CONNECT)
       socket.off(SocketEvents.DISCONNECT)
       socket.disconnect()
+      socketRef.current = null
+      setConnected(false)
     }
   }, [data, isPending])
 
