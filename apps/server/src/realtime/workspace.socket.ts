@@ -75,6 +75,11 @@ export function registerWorkspaceSockets(io: SocketIOServer): void {
             if (typeof ack === "function") ack({ ok: false })
             return
           }
+          const roomName = `workspace:${workspaceId}`
+          if (!socket.rooms.has(roomName)) {
+            if (typeof ack === "function") ack({ ok: false })
+            return
+          }
           if (source !== "editor" && source !== "canvas") {
             if (typeof ack === "function") ack({ ok: false })
             return
@@ -87,7 +92,6 @@ export function registerWorkspaceSockets(io: SocketIOServer): void {
             if (typeof ack === "function") ack({ ok: false })
             return
           }
-
           const envelope: WorkspaceRemoteSyncPayload = {
             userId,
             source,
