@@ -3,6 +3,7 @@ import {
   createWorkspace,
   deleteWorkspace,
   getWorkspaceById,
+  getWorkspaceDocument,
   listTeamWorkspaces,
   updateWorkspaceTitle,
 } from "../controllers/workspace.controller"
@@ -13,6 +14,7 @@ const workspaceRouter: Router = Router()
 workspaceRouter.use(isAuthorize)
 
 workspaceRouter.get("/team/:teamId", tryCatch(listTeamWorkspaces))
+workspaceRouter.get("/:workspaceId/document", tryCatch(getWorkspaceDocument))
 workspaceRouter.get("/:workspaceId", tryCatch(getWorkspaceById))
 workspaceRouter.post("/", tryCatch(createWorkspace))
 workspaceRouter.delete("/:workspaceId", tryCatch(deleteWorkspace))

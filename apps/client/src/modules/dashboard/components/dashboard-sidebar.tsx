@@ -56,12 +56,12 @@ const DashboardSidebar = () => {
   return (
     <>
       <Sidebar animate={false}>
-        <SidebarBody className="h-dvh justify-between border-r border-neutral-200/70 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+        <SidebarBody className="sticky top-0 h-dvh justify-between border-r border-border bg-background dark:border-border dark:bg-background">
           <div className="space-y-6">
             <div className="flex items-center gap-2">
               <Link
                 href="/dashboard/all"
-                className="flex items-center gap-2 text-sm font-bold text-neutral-700 dark:text-neutral-200"
+                className="flex items-center gap-2 text-sm font-bold text-foreground"
               >
                 <LogoIcon width={28} height={28} />
                 <span>SyncBoard</span>
