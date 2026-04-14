@@ -31,9 +31,7 @@ const isCursorSurface = (value: unknown): value is WorkspaceCursorSurface =>
 
 const clampUnit = (value: number): number => Math.min(1, Math.max(0, value))
 
-function parseCursorUpdate(
-  raw: unknown
-): {
+function parseCursorUpdate(raw: unknown): {
   workspaceId: string
   surface: WorkspaceCursorSurface | null
   x: number | null
@@ -191,7 +189,6 @@ export function registerWorkspaceSockets(io: SocketIOServer): void {
             if (typeof ack === "function") ack({ ok: false })
             return
           }
-
           const envelope: WorkspaceRemoteSyncPayload = {
             userId,
             source,
