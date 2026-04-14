@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, type FocusEvent } from "react"
 import type EditorJS from "@editorjs/editorjs"
 import type { OutputData } from "@editorjs/editorjs"
+import type { ToolConstructable } from "@editorjs/editorjs"
 import { useSocket } from "@/components/providers/socket-provider"
 import { normalizeEditorData } from "@/modules/workspace/lib/normalize-document"
 import {
@@ -135,7 +136,7 @@ const WorkspaceEditorDock = ({
         placeholder: "Write your notes...",
         tools: {
           paragraph: {
-            class: Paragraph,
+            class: Paragraph as ToolConstructable,
             config: {
               placeholder: "Type here",
             },
