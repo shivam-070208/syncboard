@@ -35,22 +35,24 @@ type WorkspaceExcalidrawStageProps = {
   workspaceId: string
   initialData: unknown
   className?: string
+  onCursorMove?: (point: { clientX: number; clientY: number }) => void
+  onCursorLeave?: () => void
 }
 
 const WorkspaceExcalidrawStage = ({
   workspaceId,
   initialData,
   className,
+  onCursorMove,
+  onCursorLeave,
 }: WorkspaceExcalidrawStageProps) => {
   const { connected, socket } = useSocket()
 
   const boot = normalizeCanvasData(initialData)
   const excalidrawAPI = useRef<ExcalidrawImperativeAPI>(null)
-
-  // 🚨 Prevent infinite loop
+  const timeOutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isRemoteUpdate = useRef(false)
 
-  // 🚨 Track last sent state
   const lastSentState = useRef("")
 
   const debouncedSend = useRef(
@@ -62,19 +64,18 @@ const WorkspaceExcalidrawStage = ({
         source: "canvas",
         payload,
       })
-    }, 120)
+    }, 140)
   ).current
 
-  // ✅ Handle incoming updates
-  useEffect(() => {
-    if (!connected || !socket) return
-
-    const handler = (data: WorkspaceRemoteSyncPayload) => {
-      if (data.socketId === socket.id) return
+  const handler = useCallback(
+    (data: WorkspaceRemoteSyncPayload) => {
+      if (data.socketId === socket?.id) return
       if (data.source !== "canvas") return
       if (!excalidrawAPI.current) return
-
-      // 🚨 Mark as remote update
+      if (timeOutRef.current) {
+        clearTimeout(timeOutRef.current)
+        timeOutRef.current = null
+      }
       isRemoteUpdate.current = true
 
       excalidrawAPI.current.updateScene({
@@ -84,20 +85,28 @@ const WorkspaceExcalidrawStage = ({
         },
       })
 
-      // small delay to avoid feedback loop
-      setTimeout(() => {
+      timeOutRef.current = setTimeout(() => {
         isRemoteUpdate.current = false
-      }, 0)
-    }
+        timeOutRef.current = null
+      }, 10)
+    },
+    [socket]
+  )
+
+  useEffect(() => {
+    if (!connected || !socket) return
 
     socket.on(SocketEvents.REMOTE_SYNC, handler)
 
     return () => {
       socket.off(SocketEvents.REMOTE_SYNC, handler)
+      if (timeOutRef.current) {
+        clearTimeout(timeOutRef.current)
+        timeOutRef.current = null
+      }
     }
-  }, [connected, socket])
+  }, [connected, socket, handler])
 
-  // ✅ Handle local changes
   const handleChange = useCallback(
     (elements: readonly ExcalidrawElement[], appState: AppState) => {
       if (isRemoteUpdate.current) return
@@ -111,7 +120,6 @@ const WorkspaceExcalidrawStage = ({
         },
       }
 
-      // 🚨 Deduplicate state
       const currentState = JSON.stringify(payload.elements)
       if (currentState === lastSentState.current) return
 
@@ -132,6 +140,13 @@ const WorkspaceExcalidrawStage = ({
         "relative min-h-0 min-w-0 flex-1 overflow-hidden bg-muted/30",
         className
       )}
+      onPointerMoveCapture={(event) => {
+        onCursorMove?.({
+          clientX: event.clientX,
+          clientY: event.clientY,
+        })
+      }}
+      onPointerLeave={onCursorLeave}
     >
       <Excalidraw
         excalidrawAPI={handleExcalidrawReady}

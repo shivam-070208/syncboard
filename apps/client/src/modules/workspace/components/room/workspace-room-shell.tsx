@@ -1,12 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { WorkspaceNavbar } from "@/modules/workspace/components/room/workspace-navbar"
 import { WorkspaceEditorDock } from "@/modules/workspace/components/room/workspace-editor-dock"
 import { WorkspaceExcalidrawStage } from "@/modules/workspace/components/room/workspace-excalidraw-stage"
+import { WorkspaceRemoteCursorLayer } from "@/modules/workspace/components/room/workspace-remote-cursor-layer"
 import { cn } from "@workspace/ui/lib/utils"
 import { useSocket } from "@/components/providers/socket-provider"
 import { SocketEvents } from "@workspace/shared"
+import { useWorkspaceCursorPresence } from "@/modules/workspace/hooks/use-workspace-cursor-presence"
 
 type WorkspaceRoomShellProps = {
   workspaceId: string
@@ -25,10 +27,26 @@ export function WorkspaceRoomShell({
   titleBusy,
   onTitleUpdate,
   onBack,
+  editorSeed,
   canvasSeed,
 }: WorkspaceRoomShellProps) {
   const [editorOpen, setEditorOpen] = useState(true)
   const { connected, socket } = useSocket()
+  const editorSurfaceRef = useRef<HTMLDivElement>(null)
+  const canvasSurfaceRef = useRef<HTMLDivElement>(null)
+  const surfaceRefs = useMemo(
+    () => ({
+      editor: editorSurfaceRef,
+      canvas: canvasSurfaceRef,
+    }),
+    []
+  )
+
+  const { remoteCursors, updateCursorFromClientPoint, clearCursor } =
+    useWorkspaceCursorPresence({
+      workspaceId,
+      surfaceRefs,
+    })
 
   useEffect(() => {
     if (!connected || !socket) return
@@ -37,6 +55,34 @@ export function WorkspaceRoomShell({
       socket.emit(SocketEvents.LEAVE, workspaceId)
     }
   }, [connected, socket, workspaceId])
+
+  useEffect(() => {
+    if (editorOpen) return
+    clearCursor()
+  }, [editorOpen, clearCursor])
+
+  const handleEditorCaretPosition = useCallback(
+    (point: { clientX: number; clientY: number }) => {
+      updateCursorFromClientPoint({
+        surface: "editor",
+        clientX: point.clientX,
+        clientY: point.clientY,
+      })
+    },
+    [updateCursorFromClientPoint]
+  )
+
+  const handleCanvasCursorPosition = useCallback(
+    (point: { clientX: number; clientY: number }) => {
+      updateCursorFromClientPoint({
+        surface: "canvas",
+        clientX: point.clientX,
+        clientY: point.clientY,
+      })
+    },
+    [updateCursorFromClientPoint]
+  )
+
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
       <WorkspaceNavbar
@@ -50,21 +96,37 @@ export function WorkspaceRoomShell({
       <div className="relative flex min-h-0 flex-1 flex-col lg:flex-row">
         {editorOpen ? (
           <div
+            ref={editorSurfaceRef}
             className={cn(
               "fixed inset-0 top-14 z-40 flex min-h-0 w-full flex-col bg-background lg:static lg:z-auto lg:h-full lg:w-1/2 lg:max-w-xl lg:border-r"
             )}
           >
-            <WorkspaceEditorDock />
+            <WorkspaceEditorDock
+              workspaceId={workspaceId}
+              initialData={editorSeed}
+              onCaretPositionChange={handleEditorCaretPosition}
+              onCaretLeave={clearCursor}
+            />
           </div>
         ) : null}
-        <WorkspaceExcalidrawStage
-          workspaceId={workspaceId}
-          initialData={canvasSeed}
+        <div
+          ref={canvasSurfaceRef}
           className={cn(
             editorOpen
-              ? "hidden min-h-0 w-full flex-1 lg:flex"
-              : "flex min-h-0 w-full flex-1"
+              ? "hidden min-h-0 w-full flex-1 overflow-hidden lg:flex"
+              : "flex min-h-0 w-full flex-1 overflow-hidden"
           )}
+        >
+          <WorkspaceExcalidrawStage
+            workspaceId={workspaceId}
+            initialData={canvasSeed}
+            onCursorMove={handleCanvasCursorPosition}
+            onCursorLeave={clearCursor}
+          />
+        </div>
+        <WorkspaceRemoteCursorLayer
+          cursors={remoteCursors}
+          surfaceRefs={surfaceRefs}
         />
       </div>
     </div>
