@@ -4,6 +4,7 @@ import axiosClient from "@/config/axios-client"
 
 export async function proxy(request: NextRequest) {
   const cookieHeader = request.headers.get("cookie") || ""
+  const pathname = new URL(request.url).pathname
 
   try {
     const res = await axiosClient.get("/auth/session", {
@@ -13,18 +14,36 @@ export async function proxy(request: NextRequest) {
       withCredentials: true,
     })
 
-    if (res.data.session) {
-      return NextResponse.next()
+    const isLoggedIn = !!res.data.session
+
+    if (pathname.startsWith("/dashboard")) {
+      if (isLoggedIn) {
+        return NextResponse.next()
+      } else {
+        const { origin } = new URL(request.url)
+        return NextResponse.redirect(`${origin}/login`)
+      }
     }
 
-    const { origin } = new URL(request.url)
-    console.log(origin)
-    return NextResponse.redirect(`${origin}/login`)
+    if (pathname === "/login" || pathname === "/sign-up") {
+      if (isLoggedIn) {
+        const { origin } = new URL(request.url)
+        return NextResponse.redirect(`${origin}/dashboard`)
+      } else {
+        return NextResponse.next()
+      }
+    }
+
+    return NextResponse.next()
   } catch {
     const { origin } = new URL(request.url)
-    return NextResponse.redirect(`${origin}/login`)
+    if (pathname.startsWith("/dashboard")) {
+      return NextResponse.redirect(`${origin}/login`)
+    }
+    return NextResponse.next()
   }
 }
+
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/login", "/sign-up"],
 }
