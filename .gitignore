@@ -35,4 +35,4 @@ npm-debug.log*
 .DS_Store
 *.pem
 tsconfig.tsbuildinfo
-!.env.example
+!.env.exampletsconfig.tsbuildinfo

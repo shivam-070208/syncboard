@@ -4,8 +4,11 @@ import http from "http"
 import { Server as SocketIOServer } from "socket.io"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-import { authRouter } from "@v1/routes"
+import { authRouter, teamRouter, workspaceRouter } from "@v1/routes"
 import morgan from "morgan"
+import { registerWorkspaceSockets } from "@/realtime/workspace.socket"
+import { initWorkspaceRedisFanout } from "@/realtime/redis-workspace-fanout"
+import { startBackgroundWorkers } from "@/jobs/start-workers"
 
 const app = express()
 const server = http.createServer(app)
@@ -32,6 +35,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use("/api/v1/auth", authRouter)
+app.use("/api/v1/team", teamRouter)
+app.use("/api/v1/workspace", workspaceRouter)
 const io = new SocketIOServer(server, {
   cors: {
     origin: allowedOrigins,
@@ -39,13 +44,9 @@ const io = new SocketIOServer(server, {
   },
 })
 
-io.on("connection", (socket) => {
-  console.log("A user connected via WebSocket:", socket.id)
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id)
-  })
-})
+initWorkspaceRedisFanout(io)
+registerWorkspaceSockets(io)
+startBackgroundWorkers()
 
 app.get("/", (req, res) => {
   res.send("Hello from Express!")

@@ -34,10 +34,14 @@ axiosClient.interceptors.response.use(
     ) {
       originalRequest._retry = true
       try {
-        await axios.post(`${baseURL}/auth/refresh`, null, {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        })
+        await axios.post(
+          `${baseURL}/auth/refresh`,
+          {},
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "application/json" },
+          }
+        )
         return axiosClient(originalRequest)
       } catch {}
     }

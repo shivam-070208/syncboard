@@ -1,14 +1,16 @@
 {
   "extends": "@workspace/typescript-config/base.json",
   "compilerOptions": {
-    "rootDir": "./src",
+    "rootDir": "../..",
     "outDir": "./dist",
     "paths": {
       "@/*": ["./src/*"],
       "@types/*": ["./src/types/*"],
-      "@v1/*": ["./src/api/v1/*"]
+      "@v1/*": ["./src/api/v1/*"],
+      "@workspace/shared": ["../../packages/shared/src/index.ts"],
+      "@workspace/shared/*": ["../../packages/shared/src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/api/v1/routes/auth"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/api/v1/routes/auth"],
   "exclude": ["node_modules", "dist"]
 }

@@ -65,7 +65,7 @@ const LoginForm: React.FC = () => {
       },
       {
         onSuccess: () => {
-          const redirect = searchParams.get("redirect") || "/"
+          const redirect = searchParams.get("redirect") || "/dashboard/all"
           reset()
           router.push(redirect)
         },
