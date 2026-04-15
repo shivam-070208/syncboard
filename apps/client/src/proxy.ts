@@ -21,7 +21,10 @@ export async function proxy(request: NextRequest) {
         return NextResponse.next()
       } else {
         const { origin } = new URL(request.url)
-        return NextResponse.redirect(`${origin}/login`)
+        const redirectParam = encodeURIComponent(pathname)
+        return NextResponse.redirect(
+          `${origin}/login?redirect=${redirectParam}`
+        )
       }
     }
 

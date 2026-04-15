@@ -3,7 +3,6 @@
 import Image from "next/image"
 import React, { useRef } from "react"
 import { motion, useScroll, useTransform } from "motion/react"
-import Link from "next/link"
 import LogoIcon from "@/components/common/logo-icon"
 
 const SketchArrow = ({ className = "" }: { className?: string }) => (
@@ -98,7 +97,7 @@ const SketchNote = ({ className = "" }: { className?: string }) => (
   </svg>
 )
 
-function Navbar() {
+const Navbar = () => {
   return (
     <motion.nav
       className="hard-shadow-md fixed inset-x-0 top-0 z-20 flex w-full items-center justify-between border-b border-black/5 bg-white/70 px-5 py-2 font-sans shadow backdrop-blur transition-all sm:px-12 dark:bg-card/80"
@@ -113,54 +112,40 @@ function Navbar() {
       </div>
       <ul className="hidden gap-7 font-medium text-primary sm:flex">
         <li>
-          <Link
-            href="#features"
-            className="transition-colors hover:text-accent"
-            scroll={false}
-          >
+          <a href="#features" className="transition-colors hover:text-accent">
             Features
-          </Link>
+          </a>
         </li>
         <li>
-          <Link
-            href="#how"
-            className="transition-colors hover:text-accent"
-            scroll={false}
-          >
+          <a href="#how" className="transition-colors hover:text-accent">
             How it works
-          </Link>
+          </a>
         </li>
         <li>
-          <Link
-            href="#product"
-            className="transition-colors hover:text-accent"
-            scroll={false}
-          >
+          <a href="#product" className="transition-colors hover:text-accent">
             Workspaces
-          </Link>
+          </a>
         </li>
         <li>
-          <Link
+          <a
             href="#get-started"
             className="transition-colors hover:text-accent"
-            scroll={false}
           >
             Start
-          </Link>
+          </a>
         </li>
       </ul>
-      <Link
-        href="/dashboard"
-        scroll={false}
+      <a
+        href="#get-started"
         className="wobbly-md hard-shadow rotate-slight ml-4 rounded-full bg-primary px-5 py-2 font-bold text-primary-foreground shadow transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-97"
       >
         Get Started
-      </Link>
+      </a>
     </motion.nav>
   )
 }
 
-function CanvasMockup() {
+const CanvasMockup = () => {
   return (
     <div className="relative z-10 mx-auto h-[370px] w-full max-w-[410px]">
       <motion.div
@@ -212,9 +197,9 @@ function CanvasMockup() {
           transition={{ delay: 0.64, type: "spring", bounce: 0.28 }}
         >
           <Image
-            src="/avatars/avatar-2.png"
-            width={34}
-            height={40}
+            src="/avatars/avatar-1.png"
+            width={38}
+            height={38}
             alt="User"
             className="hard-shadow rounded-full border-2 border-white"
           />
@@ -226,11 +211,11 @@ function CanvasMockup() {
           transition={{ delay: 0.78, type: "spring", bounce: 0.22 }}
         >
           <Image
-            src="/avatars/avatar-1.png"
-            width={38}
-            height={38}
+            src="/avatars/avatar-2.png"
+            width={34}
+            height={34}
             alt="User"
-            className="hard-shadow min-w-10 rounded-full border-2 border-white"
+            className="hard-shadow rounded-full border-2 border-white"
           />
         </motion.div>
         <motion.div
@@ -278,7 +263,7 @@ function CanvasMockup() {
   )
 }
 
-function HeroSection() {
+const HeroSection = () => {
   const ref = useRef<HTMLDivElement>(null)
   const { scrollY } = useScroll()
   const y = useTransform(scrollY, [0, 360], [0, 48])
@@ -315,68 +300,58 @@ function HeroSection() {
           <br className="hidden sm:inline" /> and build together visually.
         </motion.p>
         <div className="relative mt-2 flex flex-col items-center gap-5 sm:flex-row">
-          <motion.div
+          <motion.a
+            href="#get-started"
+            className="wobbly-md hard-shadow relative flex items-center gap-2 rounded-full bg-primary px-8 py-3 text-lg font-bold text-primary-foreground shadow-lg transition-all duration-200 hover:scale-105 hover:rotate-1 hover:bg-primary/90 active:scale-95"
             whileHover={{
               scale: 1.07,
               rotate: 1.5,
               boxShadow: "8px 8px 0px #2d2d2d",
             }}
             whileTap={{ scale: 0.97 }}
-            className="contents"
           >
-            <Link
-              href="/dashboard"
-              scroll={false}
-              className="wobbly-md hard-shadow relative flex items-center gap-2 rounded-full bg-primary px-8 py-3 text-lg font-bold text-primary-foreground shadow-lg transition-all duration-200 hover:scale-105 hover:rotate-1 hover:bg-primary/90 active:scale-95"
+            <span>Get Started</span>
+            <motion.div
+              className="absolute -top-14 -right-6"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 1.1, type: "spring", duration: 0.9 }}
             >
-              <span>Get Started</span>
-              <motion.div
-                className="absolute -top-14 -right-6"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 1.1, type: "spring", duration: 0.9 }}
-              >
-                <SketchArrow />
-              </motion.div>
-              <motion.div
-                className="absolute -top-20 -right-4"
-                initial={{ y: -18, x: 4, opacity: 0, rotate: -20, scale: 0.8 }}
-                animate={{ y: 0, x: 0, opacity: 1, rotate: 0, scale: 1 }}
-                transition={{ delay: 1.19, type: "spring", bounce: 0.15 }}
-              >
-                <svg width="36" height="42" fill="none">
-                  <path
-                    d="M12 5l6 28.5-4.3-8.5M12 5l16 16M12 5l-3 12.3"
-                    stroke="#2d2d2d"
-                    strokeWidth="2.2"
-                    fill="none"
-                  />
-                  <ellipse
-                    cx="28"
-                    cy="36"
-                    rx="4.1"
-                    ry="3"
-                    fill="#fff"
-                    stroke="#2d2d2d"
-                    strokeWidth="1.2"
-                  />
-                </svg>
-              </motion.div>
-            </Link>
-          </motion.div>
-          <motion.div
+              <SketchArrow />
+            </motion.div>
+            <motion.div
+              className="absolute -top-20 -right-4"
+              initial={{ y: -18, x: 4, opacity: 0, rotate: -20, scale: 0.8 }}
+              animate={{ y: 0, x: 0, opacity: 1, rotate: 0, scale: 1 }}
+              transition={{ delay: 1.19, type: "spring", bounce: 0.15 }}
+            >
+              <svg width="36" height="42" fill="none">
+                <path
+                  d="M12 5l6 28.5-4.3-8.5M12 5l16 16M12 5l-3 12.3"
+                  stroke="#2d2d2d"
+                  strokeWidth="2.2"
+                  fill="none"
+                />
+                <ellipse
+                  cx="28"
+                  cy="36"
+                  rx="4.1"
+                  ry="3"
+                  fill="#fff"
+                  stroke="#2d2d2d"
+                  strokeWidth="1.2"
+                />
+              </svg>
+            </motion.div>
+          </motion.a>
+          <motion.a
+            href="#product"
+            className="wobbly-md hard-shadow hover:rotate-slight relative rounded-full bg-secondary px-8 py-3 text-lg font-bold text-primary shadow transition-all duration-200 hover:scale-104"
             whileHover={{ scale: 1.05, rotate: -1 }}
             whileTap={{ scale: 0.97 }}
-            className="contents"
           >
-            <Link
-              href="#product"
-              scroll={false}
-              className="wobbly-md hard-shadow hover:rotate-slight relative rounded-full bg-secondary px-8 py-3 text-lg font-bold text-primary shadow transition-all duration-200 hover:scale-104"
-            >
-              Watch Demo
-            </Link>
-          </motion.div>
+            Watch Demo
+          </motion.a>
         </div>
       </motion.div>
       <motion.div
@@ -560,7 +535,7 @@ const FEATURES = [
   },
 ]
 
-function FeatureCard({
+const FeatureCard = ({
   title,
   desc,
   icon,
@@ -570,7 +545,7 @@ function FeatureCard({
   desc: string
   icon: React.ReactNode
   idx: number
-}) {
+}) => {
   const rotate = ["-2deg", "1.5deg", "-1.2deg", "2.4deg"][idx % 4]
   return (
     <motion.div
@@ -590,7 +565,7 @@ function FeatureCard({
   )
 }
 
-function FeaturesSection() {
+const FeaturesSection = () => {
   return (
     <section
       id="features"
@@ -708,7 +683,7 @@ const HOW_STEPS = [
   },
 ]
 
-function HowItWorksSection() {
+const HowItWorksSection = () => {
   return (
     <section
       id="how"
@@ -769,7 +744,7 @@ function HowItWorksSection() {
   )
 }
 
-function ProductShowcaseSection() {
+const ProductShowcaseSection = () => {
   const [mode, setMode] = React.useState<"canvas" | "docs">("canvas")
   return (
     <section
@@ -857,7 +832,7 @@ function ProductShowcaseSection() {
   )
 }
 
-function SocialProofSection() {
+const SocialProofSection = () => {
   return (
     <section
       id="trust"
@@ -882,8 +857,8 @@ function SocialProofSection() {
         />
         <Image
           src="/avatars/avatar-2.png"
-          width={40}
-          height={38}
+          width={36}
+          height={36}
           alt="User"
           className="hard-shadow rounded-full border-2 border-white"
         />
@@ -895,11 +870,11 @@ function SocialProofSection() {
           className="hard-shadow rounded-full border-2 border-white"
         />
         <Image
-          src="/avatars/avatar-1.png"
+          src="/avatars/avatar-5.png"
           width={34}
           height={34}
           alt="User"
-          className="hard-shadow rounded-full border-2 border-white object-cover"
+          className="hard-shadow rounded-full border-2 border-white"
         />
       </div>
       <motion.div
@@ -922,7 +897,7 @@ function SocialProofSection() {
   )
 }
 
-function CallToActionSection() {
+const CallToActionSection = () => {
   return (
     <section
       id="get-started"
@@ -937,24 +912,20 @@ function CallToActionSection() {
       >
         Start building with your team today
       </motion.h3>
-      <motion.div
+      <motion.a
+        href="/sign-up"
+        className="wobbly-md hard-shadow inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-xl font-bold text-primary-foreground shadow-xl transition-all duration-200 hover:scale-105 hover:rotate-2 hover:bg-primary/95 active:scale-[.96]"
         whileHover={{ scale: 1.09, rotate: 3 }}
         whileTap={{ scale: 0.98, rotate: 1 }}
-        className="contents"
       >
-        <Link
-          href="/sign-up"
-          className="wobbly-md hard-shadow inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-xl font-bold text-primary-foreground shadow-xl transition-all duration-200 hover:scale-105 hover:rotate-2 hover:bg-primary/95 active:scale-[.96]"
-        >
-          <SketchArrow className="mr-1 h-8 w-8" />
-          Create your first workspace
-        </Link>
-      </motion.div>
+        <SketchArrow className="mr-1 h-8 w-8" />
+        Create your first workspace
+      </motion.a>
     </section>
   )
 }
 
-function Footer() {
+const Footer = () => {
   return (
     <footer className="wobbly-md mx-auto mt-10 flex max-w-6xl flex-col items-center gap-4 border-t-2 border-primary/20 bg-white/90 px-4 pt-8 pb-7 md:flex-row md:justify-between">
       <div className="font-handwritten-heading flex items-center gap-2 text-xl text-primary">
@@ -967,34 +938,18 @@ function Footer() {
         </span>
       </div>
       <div className="mt-2 flex gap-7 font-sans font-medium text-primary md:mt-0">
-        <Link
-          href="#product"
-          scroll={false}
-          className="transition-colors hover:text-accent"
-        >
+        <a href="#product" className="transition-colors hover:text-accent">
           Product
-        </Link>
-        <Link
-          href="#features"
-          scroll={false}
-          className="transition-colors hover:text-accent"
-        >
+        </a>
+        <a href="#features" className="transition-colors hover:text-accent">
           Features
-        </Link>
-        <Link
-          href="#how"
-          scroll={false}
-          className="transition-colors hover:text-accent"
-        >
+        </a>
+        <a href="#how" className="transition-colors hover:text-accent">
           How it works
-        </Link>
-        <Link
-          href="#get-started"
-          scroll={false}
-          className="transition-colors hover:text-accent"
-        >
+        </a>
+        <a href="#get-started" className="transition-colors hover:text-accent">
           Contact
-        </Link>
+        </a>
       </div>
       <div className="mt-3 flex gap-3 md:mt-0">
         <a
@@ -1052,9 +1007,9 @@ function Footer() {
   )
 }
 
-export default function HomePage() {
+const HomePage = () => {
   return (
-    <div className="flex min-h-screen max-w-dvw flex-col font-sans text-primary">
+    <div className="flex min-h-dvh w-full flex-col font-sans text-primary">
       <Navbar />
       <main className="flex flex-1 flex-col gap-20">
         <HeroSection />
@@ -1068,3 +1023,5 @@ export default function HomePage() {
     </div>
   )
 }
+
+export default HomePage
