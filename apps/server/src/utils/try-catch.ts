@@ -8,13 +8,13 @@ export function tryCatch(
     try {
       return await handler(req, res, next)
     } catch (err) {
+      console.log(err)
       if (err instanceof ApiError) {
         return res.status(err.statusCode).json({
           message: err.message,
           cause: err.cause,
         })
       } else {
-        console.log(err)
         return res.status(500).json({
           message: "Internal Server Error",
         })

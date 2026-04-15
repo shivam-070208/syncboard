@@ -13,8 +13,8 @@ import { tryCatch } from "@/utils/try-catch"
 const workspaceRouter: Router = Router()
 workspaceRouter.use(isAuthorize)
 
-workspaceRouter.get("/team/:teamId", tryCatch(listTeamWorkspaces))
 workspaceRouter.get("/:workspaceId/document", tryCatch(getWorkspaceDocument))
+workspaceRouter.get("/team/:teamId", tryCatch(listTeamWorkspaces))
 workspaceRouter.get("/:workspaceId", tryCatch(getWorkspaceById))
 workspaceRouter.post("/", tryCatch(createWorkspace))
 workspaceRouter.delete("/:workspaceId", tryCatch(deleteWorkspace))

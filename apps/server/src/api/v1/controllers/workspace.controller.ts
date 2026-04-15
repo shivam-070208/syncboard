@@ -69,7 +69,6 @@ export const getWorkspaceById = async (req: Request, res: Response) => {
 export const getWorkspaceDocument = async (req: Request, res: Response) => {
   const userId = (req as RequestWithSession).session.user.id
   const workspaceId = req.params.workspaceId as string
-
   if (!workspaceId) {
     throw new ApiError({
       statusCode: "HTTP_400_BAD_REQUEST",

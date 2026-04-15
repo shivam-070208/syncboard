@@ -75,9 +75,9 @@ class WorkspaceService {
     const result = await query(
       `SELECT w.id, w.team_id, w.title, w.created_by, w.created_at
        FROM workspaces w
-       LEFT JOIN workspace_members wm ON wm.workspace_id = w.id
        LEFT JOIN teams t ON t.id = w.team_id
-       WHERE w.id = $1 AND (wm.user_id = $2 OR t.owner_id = $2)`,
+       LEFT JOIN team_members tm ON tm.team_id = w.team_id AND tm.user_id = $2
+       WHERE w.id = $1 AND (t.owner_id = $2 OR tm.user_id = $2)`,
       [workspaceId, userId]
     )
 
