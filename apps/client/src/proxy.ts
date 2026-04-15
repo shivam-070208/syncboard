@@ -1,48 +1,55 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import axiosClient from "@/config/axios-client"
 
 export async function proxy(request: NextRequest) {
-  const cookieHeader = request.headers.get("cookie") || ""
-  const pathname = new URL(request.url).pathname
+  const { pathname, origin } = new URL(request.url)
 
   try {
-    const res = await axiosClient.get("/auth/session", {
-      headers: {
-        Cookie: cookieHeader,
-      },
-      withCredentials: true,
-    })
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/auth/session`,
+      {
+        method: "GET",
+        headers: {
+          cookie: request.headers.get("cookie") || "",
+        },
+        credentials: "include",
+      }
+    )
 
-    const isLoggedIn = !!res.data.session
+    let data
+    const contentType = res.headers.get("content-type")
+    if (contentType && contentType.includes("application/json")) {
+      data = await res.json()
+    } else {
+      data = {}
+    }
+    const isLoggedIn = !!data?.session
 
     if (pathname.startsWith("/dashboard")) {
-      if (isLoggedIn) {
-        return NextResponse.next()
-      } else {
-        const { origin } = new URL(request.url)
+      if (!isLoggedIn) {
         const redirectParam = encodeURIComponent(pathname)
         return NextResponse.redirect(
           `${origin}/login?redirect=${redirectParam}`
         )
       }
+      return NextResponse.next()
     }
 
     if (pathname === "/login" || pathname === "/sign-up") {
       if (isLoggedIn) {
-        const { origin } = new URL(request.url)
         return NextResponse.redirect(`${origin}/dashboard`)
-      } else {
-        return NextResponse.next()
       }
+      return NextResponse.next()
     }
 
     return NextResponse.next()
-  } catch {
-    const { origin } = new URL(request.url)
+  } catch (error) {
+    console.error("Middleware error:", error)
+
     if (pathname.startsWith("/dashboard")) {
       return NextResponse.redirect(`${origin}/login`)
     }
+
     return NextResponse.next()
   }
 }
