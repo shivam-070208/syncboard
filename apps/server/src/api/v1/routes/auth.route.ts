@@ -6,6 +6,10 @@ import {
   logout,
   session,
 } from "@v1/controllers/auth.controller"
+import {
+  googleAuth,
+  googleAuthCallback,
+} from "@v1/controllers/google-auth.controller"
 import { tryCatch } from "@/utils/try-catch"
 
 const authRouter: Router = Router()
@@ -14,6 +18,9 @@ authRouter.post("/signup", tryCatch(signup))
 authRouter.post("/login", tryCatch(login))
 authRouter.post("/refresh", tryCatch(refresh))
 authRouter.post("/logout", tryCatch(logout))
+
+authRouter.get("/google", tryCatch(googleAuth))
+authRouter.get("/google/callback", tryCatch(googleAuthCallback))
 
 authRouter.get("/session", tryCatch(session))
 export default authRouter

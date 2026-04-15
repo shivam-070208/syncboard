@@ -121,6 +121,17 @@ class AuthService {
     return { accessToken: newAccessToken }
   }
 
+  async createSessionForUser(user: User) {
+    const accessToken = jwtUtil.generateAccessToken({ userId: user.id })
+    const refreshToken = jwtUtil.generateRefreshToken({ userId: user.id })
+    const session: Session = {
+      user,
+      refreshToken,
+    }
+    await setSession(user.id, session)
+    return { accessToken, refreshToken }
+  }
+
   async logout(token: string) {
     const decoded = jwtUtil.verifyAccessToken(token)
     const userId =
