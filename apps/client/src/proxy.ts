@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import axiosClient from "@/config/axios-client"
 
 export async function proxy(request: NextRequest) {
   const pathname = new URL(request.url).pathname
@@ -11,34 +10,30 @@ export async function proxy(request: NextRequest) {
       withCredentials: true,
     })
 
-    const isLoggedIn = !!res.data.session
-
-    if (pathname.startsWith("/dashboard")) {
-      if (isLoggedIn) {
-        return NextResponse.next()
-      } else {
-        const { origin } = new URL(request.url)
-        const redirectParam = encodeURIComponent(pathname)
-        return NextResponse.redirect(
-          `${origin}/login?redirect=${redirectParam}`
-        )
-      }
+    let data
+    const contentType = res.headers.get("content-type")
+    if (contentType && contentType.includes("application/json")) {
+      data = await res.json()
+    } else {
+      data = {}
     }
 
-    if (pathname === "/login" || pathname === "/sign-up") {
-      if (isLoggedIn) {
-        const { origin } = new URL(request.url)
-        return NextResponse.redirect(`${origin}/dashboard`)
-      } else {
-        return NextResponse.next()
-      }
+    const isLoggedIn = !!data?.session
+
+    if (pathname.startsWith("/dashboard") && !isLoggedIn) {
+      const redirectParam = encodeURIComponent(pathname)
+      return NextResponse.redirect(`${origin}/login?redirect=${redirectParam}`)
+    }
+
+    if ((pathname === "/login" || pathname === "/sign-up") && isLoggedIn) {
+      return NextResponse.redirect(`${origin}/dashboard`)
     }
 
     return NextResponse.next()
-  } catch {
-    const { origin } = new URL(request.url)
+  } catch (error) {
     if (pathname.startsWith("/dashboard")) {
-      return NextResponse.redirect(`${origin}/login`)
+      const redirectParam = encodeURIComponent(pathname)
+      return NextResponse.redirect(`${origin}/login?redirect=${redirectParam}`)
     }
     return NextResponse.next()
   }
