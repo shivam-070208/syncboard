@@ -90,7 +90,6 @@ export const logout = async (req: Request, res: Response) => {
 
 export const session = async (req: Request, res: Response) => {
   const token = req.cookies?.[AuthToken.REFRESH_TOKEN]
-  console.log(token)
   if (!token)
     throw new ApiError({
       statusCode: "HTTP_401_UNAUTHORIZED",

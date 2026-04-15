@@ -1,3 +1,4 @@
+import { unauthRequired } from "@/lib/auth-utils"
 import AuthLayout from "@/modules/auth/components/auth-layout"
 import LoginForm from "@/modules/auth/components/login"
 import { Suspense } from "react"
@@ -8,7 +9,8 @@ export const metadata = {
     "Login to SyncBoard and continue collaborating on live visual workspaces.",
 }
 
-const page = () => {
+const page = async () => {
+  await unauthRequired()
   return (
     <Suspense fallback={<div>...Loading</div>}>
       <AuthLayout authType="login">
