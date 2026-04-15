@@ -6,6 +6,7 @@ export async function proxy(request: NextRequest) {
 
   try {
     const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/["']/g, "")
+    console.log(request.headers.get("cookie"))
     const res = await fetch(`${serverUrl}/api/v1/auth/session`, {
       method: "GET",
       headers: {
