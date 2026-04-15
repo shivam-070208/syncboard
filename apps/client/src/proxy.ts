@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server"
 
 export async function proxy(request: NextRequest) {
   const { pathname, origin } = new URL(request.url)
-  const { pathname, origin } = new URL(request.url)
 
   try {
     console.log(request.headers.get("cookie"))
