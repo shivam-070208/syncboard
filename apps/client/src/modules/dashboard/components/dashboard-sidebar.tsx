@@ -56,7 +56,7 @@ const DashboardSidebar = () => {
   return (
     <>
       <Sidebar animate={false}>
-        <SidebarBody className="sticky h-dvh justify-between border-r border-border bg-background dark:border-border dark:bg-background">
+        <SidebarBody className="sticky top-0 h-dvh justify-between border-r border-border bg-background dark:border-border dark:bg-background">
           <div className="space-y-6">
             <div className="flex items-center gap-2">
               <Link
