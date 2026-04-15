@@ -3,14 +3,11 @@ import type { NextRequest } from "next/server"
 import axiosClient from "@/config/axios-client"
 
 export async function proxy(request: NextRequest) {
-  const cookieHeader = request.headers.get("cookie") || ""
   const pathname = new URL(request.url).pathname
 
   try {
     const res = await axiosClient.get("/auth/session", {
-      headers: {
-        Cookie: cookieHeader,
-      },
+      headers: headers,
       withCredentials: true,
     })
 
